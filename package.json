@@ -1,0 +1,13 @@
+{
+  "name": "minimal-bluebird-webpack-debug-issue",
+  "author": "Greg McLeod",
+  "version": "0.0.1",
+  "description": "Demonstrates __DEBUG__ issue with webpack and bluebird",
+  "scripts": {
+    "webpack": "webpack -p"
+  },
+  "dependencies": {
+    "bluebird": "3.5.1",
+    "webpack": "3.8.1"
+  }
+}
