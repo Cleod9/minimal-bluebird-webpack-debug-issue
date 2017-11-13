@@ -1,21 +1,21 @@
 # minimal-bluebird-webpack-debug-issue
-Demonstrates an issue with `__DEBUG__` from [Bluebird's](https://github.com/petkaantonov/bluebird) source being compiled as `true` despite production settings in [Webpack](https://github.com/webpack/webpack). This causes `longStackTraces` in Bluebird to always be true by default, which can result in **performance losses and memory leaks** due to `longStackTraces` holding onto references from a Promise instance's call stack longer than desired. (Additionally `warnings` and `wForgottenReturn` are also forced to `true` by default as a consequence)
+Demonstrates an issue with non-minified [Bluebird](https://github.com/petkaantonov/bluebird) defaulting to `debbuging=true` with [Webpack](https://github.com/webpack/webpack). This causes `longStackTraces` in Bluebird to always be true by default, which can result in **performance losses and memory leaks** due to `longStackTraces` holding onto references from a Promise instance's call stack longer than desired. (Additionally `warnings` and `wForgottenReturn` are also forced to `true` by default as a consequence)
 
 First run:
 
 ```
-npm install
+npm install --production
 ```
 
-Now edit `node_modules/bluebird/js/browser/bluebird.js` and search for the line containing `var debugging = ...`.  Below this variable declaration add the following:
+Now edit `node_modules/bluebird/js/browser/bluebird.js` and search for the line containing `var debugging = ...`. 
 
-(e.g. https://github.com/petkaantonov/bluebird/blob/master/src/debuggability.js#L20 )
+Below this variable declaration add the following:
+
 ```
 console.info('Debugging value:', debugging);
 ```
 
-Compile the project:
-
+Compile and run:
 ```
 npm run webpack
 node dist/built.js
@@ -29,17 +29,14 @@ Done.
 
 **Expected behavior:**
 
-`__DEBUG__` value should be `false`, since webpack should be compiling as production.
+`debugging` value should be `false`, since the project was compiled for production
 
 **Workaround:**
 
 Explicitly pass in desired debug config to Bluebird's `Promise.config()`.
 
-
 **Misc. Notes:**
 
--  While the workaround does resolve the core issue, note that internally bluebird is still looking at a `__DEBUG__` value of `true`.
+-  The source pulled in by Webpack is apparently under: `node_modules/bluebird/js/browser/bluebird.js` (Can confirm with simple console logs). Appears to be related to how the package was published on NPM , as the original source is https://github.com/petkaantonov/bluebird/blob/master/src/debuggability.js#L20 . Additional details may be needed on the proper method to pull in the minified version into webpack instead of this dev version. If there is no way to do this, then the hard-coded `true` in the unminified Bluebird should probably be removed.
 
-- Attempting to specify `__DEBUG__` via `DefinePlugin` doesn't seem to have any effect
-
-- There seems to be a lack of documentation on the web for the conventional use of `__DEBUG__` in JavaScript (Research suggests it is derived from Python?). Perhaps this should also be addressed on Bluebird's end by removing this flag, as there are already several other ways to configure its debugging flags. It also seems desirable to have webpack's documentation updated to explain where `__DEBUG__` is coming from, or ignore the flag altogether (unless explicitly passed via `DefinePlugin`).
+- Root cause of `debugging=false` caused by `__DEBUG__`: https://github.com/petkaantonov/bluebird/blob/master/src/debuggability.js#L20
