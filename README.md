@@ -7,7 +7,7 @@ First run:
 npm install --production
 ```
 
-Now edit `node_modules/bluebird/js/browser/bluebird.js` and search for the line containing `var debugging = ...`. 
+Now edit `node_modules/bluebird/js/browser/bluebird.js` and search for the line containing `var debugging =`
 
 Below this variable declaration add the following:
 
